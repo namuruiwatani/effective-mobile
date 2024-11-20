@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  stock-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: stockdb
+    volumes:
+      - ./init/stock-init.sql:/docker-entrypoint-initdb.d/stock-init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - stock-history-net
+
+  history-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: historydb
+    volumes:
+      - ./init/history-init.sql:/docker-entrypoint-initdb.d/history-init.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - stock-history-net
+
+  stock-service:
+    build: ./services/stock-service
+    environment:
+      DATABASE_URL: postgres://postgres:password@stock-db:5432/stockdb
+      ACTIONS_URL: "http://host.docker.internal:3002/actions"
+    depends_on:
+      - stock-db
+    networks:
+      - stock-history-net
+    ports:
+      - "3001:3000"
+
+  history-service:
+    build: ./services/history-service
+    environment:
+      DATABASE_URL: postgres://postgres:password@history-db:5432/historydb
+    depends_on:
+      - history-db
+    networks:
+      - stock-history-net
+    ports:
+      - "3002:4000"
+
+networks:
+  stock-history-net:
+    driver: bridge
