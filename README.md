@@ -6,7 +6,7 @@
 This project includes two services:
 
 1. **Stock Service**: Manages products, shops, and stock levels (Port: **3001**).
-2. **History Service**: Handles action logs for products and shops (Port: **3002**).
+2. **History Service**: Handles action logs for products (Port: **3002**).
 
 Both services communicate with each other and are containerized using Docker. 
 
